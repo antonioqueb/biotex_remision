@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo noupdate="1">
     <record id="seq_remision" model="ir.sequence">
-        <field name="name">Remisión Biotex</field>
+        <field name="name">Remisión</field>
         <field name="code">biotex.remision</field>
         <field name="prefix">REM-%(year)s-</field>
         <field name="padding">5</field>

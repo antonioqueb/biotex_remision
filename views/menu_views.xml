@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_remision" name="Remisiones" parent="biotex_base.menu_biotex_operations" sequence="60" action="action_remision"/>
+    <record id="action_remision_to_invoice" model="ir.actions.act_window">
+        <field name="name">Por facturar</field>
+        <field name="res_model">biotex.remision</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', 'in', ('delivered', 'signed'))]</field>
+        <field name="context">{'search_default_group_contract': 1}</field>
+    </record>
+
+    <menuitem id="menu_remision_root" name="Remisiones" sequence="15" web_icon="biotex_remision,static/description/icon.png"
+              groups="biotex_base.group_biotex_delegation"/>
+    <menuitem id="menu_remision" name="Remisiones" parent="menu_remision_root" sequence="10" action="action_remision"/>
+    <menuitem id="menu_remision_to_invoice" name="Por facturar" parent="menu_remision_root" sequence="20" action="action_remision_to_invoice"
+              groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
+    <!-- Contabilidad factura desde su app -->
+    <menuitem id="menu_account_remision_to_invoice" name="Remisiones por facturar" parent="account.menu_finance_receivables" sequence="90"
+              action="action_remision_to_invoice" groups="biotex_base.group_biotex_accounting"/>
 </odoo>
