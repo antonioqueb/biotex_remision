@@ -4,7 +4,7 @@ from odoo import api, fields, models
 class BiotexContractLine(models.Model):
     _inherit = 'biotex.contract.line'
 
-    mask_ids = fields.One2many('biotex.remision.mask', 'contract_line_id', string='Remisionado')
+    mask_ids = fields.One2many('biotex.remision.mask', 'contract_line_id', string='Máscaras de remisión')
 
     def _get_delivered_values(self):
         delivered = self.mask_ids.filtered(lambda m: m.state in ('delivered', 'signed', 'invoiced'))
