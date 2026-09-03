@@ -27,11 +27,11 @@ class BiotexRemision(models.Model):
     contract_id = fields.Many2one('biotex.contract', string='Contrato', tracking=True, domain=[('state', '=', 'active')])
     partner_id = fields.Many2one(
         'res.partner', string='Institución / cliente', required=True, tracking=True,
-        compute='_compute_from_contract', store=True, readonly=False)
+        compute='_compute_from_contract', store=True, readonly=False, precompute=True)
     partner_shipping_id = fields.Many2one('res.partner', string='Lugar de entrega (unidad / hospital)')
     company_id = fields.Many2one(
         'res.company', string='Razón social que emite', required=True, tracking=True,
-        compute='_compute_from_contract', store=True, readonly=False,
+        compute='_compute_from_contract', store=True, readonly=False, precompute=True,
         default=lambda self: self.env.company,
         help='Logo y datos fiscales de la remisión. Viene del contrato (R30).')
     currency_id = fields.Many2one(related='company_id.currency_id')
@@ -68,6 +68,9 @@ class BiotexRemision(models.Model):
             if r.contract_id:
                 r.partner_id = r.contract_id.partner_id
                 r.company_id = r.contract_id.company_id
+            else:
+                r.partner_id = r.partner_id
+                r.company_id = r.company_id or self.env.company
 
     @api.depends('company_id', 'warehouse_id.company_id')
     def _compute_is_intercompany(self):
@@ -137,6 +140,7 @@ class BiotexRemision(models.Model):
             r._create_picking()
             r._biotex_after_confirm()
             r.state = 'confirmed'
+        return True
 
     def _biotex_after_confirm(self):
         """Gancho para multiempresa (venta interna sin traspaso físico)."""
@@ -154,12 +158,14 @@ class BiotexRemision(models.Model):
             r.state = 'delivered'
             r.contract_id.line_ids._compute_delivered()
             r.contract_id._check_alerts()
+        return True
 
     def action_sign(self):
         for r in self:
             if not r.signature or not r.signed_by:
                 raise UserError('Capture la firma y el nombre de quien recibe.')
             r.write({'state': 'signed', 'signed_on': fields.Datetime.now()})
+        return True
 
     def action_cancel(self):
         for r in self:
@@ -171,6 +177,7 @@ class BiotexRemision(models.Model):
             r._biotex_on_cancel()
             r.write({'state': 'cancelled'})
             r.contract_id.line_ids._compute_delivered()
+        return True
 
     def _biotex_on_cancel(self):
         return True
@@ -266,6 +273,7 @@ class BiotexRemision(models.Model):
                     vals.append((0, 0, {'line_id': l.id, 'contract_line_id': cl.id, 'product_qty': min(l.product_qty, cl.qty_remaining)}))
             if vals:
                 r.mask_ids = vals
+        return True
 
 
 class StockPicking(models.Model):
