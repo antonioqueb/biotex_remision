@@ -7,8 +7,44 @@
         <field name="domain">[('state', 'in', ('delivered', 'signed'))]</field>
         <field name="context">{'search_default_group_contract': 1}</field>
     </record>
+    <record id="action_remision_unsigned" model="ir.actions.act_window">
+        <field name="name">Sin firma</field>
+        <field name="res_model">biotex.remision</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'delivered')]</field>
+    </record>
+    <record id="action_customer_invoices_open" model="ir.actions.act_window">
+        <field name="name">Facturas de cliente</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('move_type', 'in', ('out_invoice', 'out_refund'))]</field>
+        <field name="context">{'default_move_type': 'out_invoice', 'search_default_group_company': 1}</field>
+    </record>
+    <record id="action_receivables_open" model="ir.actions.act_window">
+        <field name="name">Cuentas por cobrar</field>
+        <field name="res_model">account.move</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="domain">[('move_type', 'in', ('out_invoice', 'out_refund')), ('state', '=', 'posted'), ('payment_state', 'in', ('not_paid', 'partial'))]</field>
+        <field name="context">{'search_default_group_company': 1, 'search_default_group_partner': 1}</field>
+    </record>
 
-    <menuitem id="menu_remision" name="Remisiones" parent="stock.menu_stock_warehouse_mgmt" sequence="5" action="action_remision"/>
+    <!-- App Remisiones: salidas de las delegaciones -->
+    <menuitem id="menu_remision_root" name="Remisiones" sequence="14" web_icon="biotex_remision,static/description/icon.svg"
+              groups="biotex_base.group_biotex_delegation"/>
+    <menuitem id="menu_remision" name="Remisiones" parent="menu_remision_root" sequence="10" action="action_remision"/>
+    <menuitem id="menu_remision_unsigned" name="Sin firma" parent="menu_remision_root" sequence="20" action="action_remision_unsigned"/>
+
+    <!-- App Cobranza: facturar remisiones contra contrato y cobrar -->
+    <menuitem id="menu_collection_root" name="Cobranza" sequence="15" web_icon="biotex_remision,static/description/icon_cobranza.svg"
+              groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
+    <menuitem id="menu_collection_to_invoice" name="Remisiones por facturar" parent="menu_collection_root" sequence="10" action="action_remision_to_invoice"/>
+    <menuitem id="menu_collection_invoices" name="Facturas de cliente" parent="menu_collection_root" sequence="20" action="action_customer_invoices_open"/>
+    <menuitem id="menu_collection_receivables" name="Cuentas por cobrar" parent="menu_collection_root" sequence="30" action="action_receivables_open"/>
+    <menuitem id="menu_collection_contract_lines" name="Avance por clave" parent="menu_collection_root" sequence="40"
+              action="biotex_contract.action_biotex_contract_lines"/>
+
+    <!-- Acceso también desde Inventario y Facturación -->
+    <menuitem id="menu_stock_remision" name="Remisiones" parent="stock.menu_stock_warehouse_mgmt" sequence="5" action="action_remision"/>
     <menuitem id="menu_account_remision_to_invoice" name="Remisiones por facturar" parent="account.menu_finance_receivables" sequence="90"
               action="action_remision_to_invoice" groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
 </odoo>
