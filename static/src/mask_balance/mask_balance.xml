@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="biotex_remision.MaskBalance">
+        <div class="o_biotex_mask_balance border rounded p-3 mb-3 bg-light">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <div class="small text-muted mb-1">Entregado vs. cobrado (máscara)</div>
+                    <div class="d-flex justify-content-between"><span>Valor entregado (ref.)</span><b t-esc="fmt(d.delivered)"/></div>
+                    <div class="d-flex justify-content-between"><span>Importe a cobrar por claves</span><b class="text-primary" t-esc="fmt(d.billed)"/></div>
+                    <div class="d-flex justify-content-between border-top mt-1 pt-1"><span>Diferencia</span><b t-att-class="diffClass" t-esc="fmt(d.diff)"/></div>
+                    <div t-if="d.lines.some(l => l.mapped &lt; l.amount)" class="small text-warning mt-1"><i class="fa fa-exclamation-triangle me-1"/>Hay productos sin clave asociada (se casa por monto; verifique el total).</div>
+                </div>
+                <div class="col-md-7" t-if="d.has_contract">
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Consumo del contrato con esta remisión</span>
+                        <span>Saldo después: <b t-att-class="exceeds ? 'text-danger' : ''" t-esc="fmt(d.contract_remaining - d.billed)"/></span>
+                    </div>
+                    <div class="progress" style="height: 22px;">
+                        <div class="progress-bar bg-success" t-attf-style="width: {{beforePct}}%" title="Ya remisionado"/>
+                        <div class="progress-bar" t-att-class="exceeds ? 'bg-danger' : 'bg-info progress-bar-striped'" t-attf-style="width: {{Math.max(0, afterPct - beforePct)}}%" title="Esta remisión"/>
+                    </div>
+                    <div class="d-flex justify-content-between small mt-1">
+                        <span>Remisionado <t t-esc="fmt(d.contract_delivered)"/></span>
+                        <span>Total <t t-esc="fmt(d.contract_total)"/> (+<t t-esc="d.tolerance_pct"/>% tol.)</span>
+                    </div>
+                    <div t-if="exceeds" class="alert alert-danger py-1 small mt-2 mb-0"><i class="fa fa-ban me-1"/>Esta remisión excede el monto del contrato más la tolerancia. No podrá confirmarse.</div>
+                    <div t-if="d.masks.some(m => m.qty > m.remaining)" class="alert alert-warning py-1 small mt-2 mb-0"><i class="fa fa-exclamation-triangle me-1"/>Alguna clave se cobra por encima de su cantidad pendiente (permitido: control por monto).</div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

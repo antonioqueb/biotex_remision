@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_remision_form" model="ir.ui.view">
+        <field name="name">biotex.remision.form</field>
+        <field name="model">biotex.remision</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_auto_mask" type="object" string="Proponer claves" icon="fa-magic" invisible="state != 'draft' or not contract_id"/>
+                    <button name="action_confirm" type="object" string="Confirmar" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_deliver" type="object" string="Marcar entregada" class="btn-primary" invisible="state != 'confirmed'"/>
+                    <button name="action_sign" type="object" string="Registrar firma" class="btn-primary" invisible="state != 'delivered'"/>
+                    <button name="action_create_invoice" type="object" string="Facturar" invisible="state not in ('delivered', 'signed')" groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
+                    <button name="action_print" type="object" string="Imprimir remisión" icon="fa-print" invisible="state == 'draft'"/>
+                    <button name="action_cancel" type="object" string="Cancelar" invisible="state in ('invoiced', 'cancelled')"/>
+                    <button name="action_draft" type="object" string="Reabrir" invisible="state != 'cancelled'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,delivered,signed,invoiced"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Interempresa" bg_color="text-bg-info" invisible="not is_intercompany"/>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group string="Sustento y cliente">
+                            <field name="support_type" readonly="state != 'draft'"/>
+                            <field name="contract_id" invisible="support_type != 'contract'" required="support_type == 'contract'" readonly="state != 'draft'"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="partner_shipping_id" readonly="state not in ('draft', 'confirmed')" domain="[('commercial_partner_id', '=', partner_id)]"/>
+                            <field name="support_ref" readonly="state != 'draft'"/>
+                        </group>
+                        <group string="Razón social y almacén">
+                            <field name="company_id" readonly="state != 'draft' or support_type == 'contract'" groups="base.group_multi_company"/>
+                            <field name="warehouse_id" readonly="state != 'draft'"/>
+                            <field name="stock_company_id" groups="base.group_multi_company"/>
+                            <field name="is_intercompany" invisible="1"/>
+                            <field name="direct_delivery" readonly="state != 'draft'"/>
+                            <field name="date" readonly="state != 'draft'"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="picking_id" invisible="not picking_id"/>
+                            <field name="invoice_id" invisible="not invoice_id"/>
+                        </group>
+                    </group>
+                    <field name="mask_balance" widget="biotex_mask_balance" nolabel="1" invisible="not line_ids"/>
+                    <notebook>
+                        <page string="Productos entregados" name="lines">
+                            <field name="line_ids" readonly="state != 'draft'">
+                                <list editable="bottom" decoration-danger="free_qty &lt; product_qty">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom_id" optional="hide"/>
+                                    <field name="free_qty"/>
+                                    <field name="lot_name" optional="show"/>
+                                    <field name="price_unit"/>
+                                    <field name="amount" sum="Total"/>
+                                    <field name="masked_qty" optional="show"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Claves a cobrar (máscara)" name="masks" invisible="support_type != 'contract'">
+                            <div class="alert alert-info py-1" role="alert">
+                                Registre con qué clave(s) del contrato se cobrará lo entregado. Lo entregado puede diferir de lo licitado: se casa por <b>monto</b>.
+                            </div>
+                            <field name="mask_ids" readonly="state != 'draft'" context="{'default_contract_id': contract_id}">
+                                <list editable="bottom" decoration-danger="product_qty > qty_remaining">
+                                    <field name="line_id"/>
+                                    <field name="contract_line_id" options="{'no_create': True}"/>
+                                    <field name="qty_remaining"/>
+                                    <field name="product_qty"/>
+                                    <field name="price_unit"/>
+                                    <field name="amount" sum="Importe a cobrar"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Firma del cliente" name="signature">
+                            <group>
+                                <field name="signed_by" readonly="state in ('signed', 'invoiced')"/>
+                                <field name="signed_on" readonly="1"/>
+                            </group>
+                            <field name="signature" widget="signature" readonly="state in ('signed', 'invoiced')"/>
+                        </page>
+                        <page string="Observaciones" name="notes"><field name="notes"/></page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_remision_list" model="ir.ui.view">
+        <field name="name">biotex.remision.list</field>
+        <field name="model">biotex.remision</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="contract_id" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="warehouse_id"/>
+                <field name="amount_billed" sum="A cobrar"/>
+                <field name="amount_delivered" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="is_intercompany" optional="hide"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="state" widget="badge" decoration-info="state == 'confirmed'" decoration-warning="state == 'delivered'" decoration-success="state in ('signed', 'invoiced')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_remision_search" model="ir.ui.view">
+        <field name="name">biotex.remision.search</field>
+        <field name="model">biotex.remision</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="contract_id"/>
+                <field name="warehouse_id"/>
+                <filter name="to_invoice" string="Por facturar" domain="[('state', 'in', ('delivered', 'signed'))]"/>
+                <filter name="unsigned" string="Sin firma" domain="[('state', '=', 'delivered')]"/>
+                <group>
+                    <filter name="group_contract" string="Contrato" context="{'group_by': 'contract_id'}"/>
+                    <filter name="group_company" string="Razón social" context="{'group_by': 'company_id'}"/>
+                    <filter name="group_warehouse" string="Delegación" context="{'group_by': 'warehouse_id'}"/>
+                    <filter name="group_state" string="Estado" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_remision" model="ir.actions.act_window">
+        <field name="name">Remisiones</field>
+        <field name="res_model">biotex.remision</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_server_invoice_remisions" model="ir.actions.server">
+        <field name="name">Facturar remisiones agrupadas</field>
+        <field name="model_id" ref="model_biotex_remision"/>
+        <field name="binding_model_id" ref="model_biotex_remision"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_create_invoice()</field>
+    </record>
+</odoo>

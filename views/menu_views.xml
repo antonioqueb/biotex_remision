@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_remision" name="Remisiones" parent="biotex_base.menu_biotex_operations" sequence="60" action="action_remision"/>
+</odoo>

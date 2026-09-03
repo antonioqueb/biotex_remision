@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_remision_delegation,remision delegation,model_biotex_remision,biotex_base.group_biotex_delegation,1,1,1,1
+access_remision_line_delegation,remision line delegation,model_biotex_remision_line,biotex_base.group_biotex_delegation,1,1,1,1
+access_remision_mask_delegation,remision mask delegation,model_biotex_remision_mask,biotex_base.group_biotex_delegation,1,1,1,1

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_contract_form_remision" model="ir.ui.view">
+        <field name="name">biotex.contract.form.remision</field>
+        <field name="model">biotex.contract</field>
+        <field name="inherit_id" ref="biotex_contract.view_contract_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@class='oe_title']" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button name="%(biotex_remision.action_remision)d" type="action" class="oe_stat_button" icon="fa-truck"
+                            context="{'search_default_contract_id': id, 'default_contract_id': id}" string="Remisiones"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

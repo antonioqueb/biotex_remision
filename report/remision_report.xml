@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_remision" model="ir.actions.report">
+        <field name="name">Remisión</field>
+        <field name="model">biotex.remision</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">biotex_remision.report_remision</field>
+        <field name="report_file">biotex_remision.report_remision</field>
+        <field name="print_report_name">'Remision - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_biotex_remision"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_remision_document">
+        <t t-call="web.external_layout">
+            <t t-set="company" t-value="o.company_id.sudo()"/>
+            <div class="page">
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <h2 class="mb-0">REMISIÓN <span t-field="o.name"/></h2>
+                        <div class="text-muted">Fecha: <span t-field="o.date"/> · Delegación: <span t-field="o.warehouse_id.name"/></div>
+                    </div>
+                    <div class="col-5 text-end">
+                        <div t-if="o.contract_id"><strong>Contrato:</strong> <span t-field="o.contract_id.name"/></div>
+                        <div t-if="o.support_ref"><strong>Referencia:</strong> <span t-field="o.support_ref"/></div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <strong>Cliente:</strong>
+                        <div t-field="o.partner_id" t-options="{'widget': 'contact', 'fields': ['name', 'address', 'vat'], 'no_marker': True}"/>
+                    </div>
+                    <div class="col-6" t-if="o.partner_shipping_id">
+                        <strong>Entregar en:</strong>
+                        <div t-field="o.partner_shipping_id" t-options="{'widget': 'contact', 'fields': ['name', 'address'], 'no_marker': True}"/>
+                    </div>
+                </div>
+                <table class="table table-sm o_main_table">
+                    <thead>
+                        <tr><th>#</th><th>Clave</th><th>Descripción</th><th>Marca</th><th>Lote</th><th class="text-end">Cantidad</th><th>Unidad</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="o.line_ids" t-as="l">
+                            <td><t t-esc="l_index + 1"/></td>
+                            <td><span t-field="l.product_id.default_code"/></td>
+                            <td><span t-field="l.product_id.name"/></td>
+                            <td><span t-field="l.product_id.biotex_brand_id.name"/></td>
+                            <td><span t-field="l.lot_name"/></td>
+                            <td class="text-end"><span t-field="l.product_qty"/></td>
+                            <td><span t-field="l.product_uom_id.name"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <t t-if="o.mask_ids and o.env.context.get('show_masks')">
+                    <h6 class="mt-3">Claves de contrato cubiertas</h6>
+                    <table class="table table-sm">
+                        <thead><tr><th>Clave</th><th>Descripción</th><th class="text-end">Cantidad</th><th class="text-end">Precio</th><th class="text-end">Importe</th></tr></thead>
+                        <tbody>
+                            <tr t-foreach="o.mask_ids" t-as="m">
+                                <td><span t-field="m.contract_line_id.code"/></td>
+                                <td><span t-field="m.contract_line_id.name"/></td>
+                                <td class="text-end"><span t-field="m.product_qty"/></td>
+                                <td class="text-end"><span t-field="m.price_unit"/></td>
+                                <td class="text-end"><span t-field="m.amount"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </t>
+                <p t-if="o.notes" class="mt-2"><strong>Observaciones:</strong> <span t-field="o.notes"/></p>
+                <div class="row mt-5">
+                    <div class="col-6 text-center">
+                        <div style="height:70px"></div>
+                        <div style="border-top:1px solid #000">Entrega · <span t-field="o.user_id.name"/></div>
+                    </div>
+                    <div class="col-6 text-center">
+                        <img t-if="o.signature" t-att-src="image_data_uri(o.signature)" style="max-height:70px"/>
+                        <div t-else="" style="height:70px"></div>
+                        <div style="border-top:1px solid #000">Recibió · <span t-field="o.signed_by"/> <span t-if="o.signed_on" t-field="o.signed_on"/></div>
+                    </div>
+                </div>
+                <div t-if="company.biotex_remision_footer" class="mt-3 small" t-out="company.biotex_remision_footer"/>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_remision">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="biotex_remision.report_remision_document" t-lang="o.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+</odoo>
