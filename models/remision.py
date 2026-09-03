@@ -203,7 +203,6 @@ class BiotexRemision(models.Model):
             'origin': self.name,
             'biotex_remision_id': self.id,
             'move_ids': [(0, 0, {
-                'name': l.product_id.display_name,
                 'product_id': l.product_id.id,
                 'product_uom_qty': l.product_qty,
                 uom_field: l.product_uom_id.id,
