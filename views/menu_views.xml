@@ -8,12 +8,7 @@
         <field name="context">{'search_default_group_contract': 1}</field>
     </record>
 
-    <menuitem id="menu_remision_root" name="Remisiones" sequence="15" web_icon="biotex_remision,static/description/icon.png"
-              groups="biotex_base.group_biotex_delegation"/>
-    <menuitem id="menu_remision" name="Remisiones" parent="menu_remision_root" sequence="10" action="action_remision"/>
-    <menuitem id="menu_remision_to_invoice" name="Por facturar" parent="menu_remision_root" sequence="20" action="action_remision_to_invoice"
-              groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
-    <!-- Contabilidad factura desde su app -->
+    <menuitem id="menu_remision" name="Remisiones" parent="stock.menu_stock_warehouse_mgmt" sequence="5" action="action_remision"/>
     <menuitem id="menu_account_remision_to_invoice" name="Remisiones por facturar" parent="account.menu_finance_receivables" sequence="90"
-              action="action_remision_to_invoice" groups="biotex_base.group_biotex_accounting"/>
+              action="action_remision_to_invoice" groups="biotex_base.group_biotex_accounting,biotex_base.group_biotex_direction"/>
 </odoo>
