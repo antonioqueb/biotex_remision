@@ -1,7 +1,7 @@
 {
     'name': 'Remisiones con máscara de contrato',
     'summary': 'Remisión de salida por delegación con razón social del contrato, producto entregado vs. clave cobrada (máscara), consumo de contrato, firma y facturación agrupada',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Distribución de insumos',
     'author': 'Alphaqueb Consulting SAS',
     'license': 'LGPL-3',
